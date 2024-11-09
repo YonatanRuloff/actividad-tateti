@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <!-- Establece el diseño responsivo -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Título del navegador -->
+    <title>Tateti</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Título del juego -->
+    <h1>TA-TE-TI</h1>
+    <!-- Contenedor de la cuadrícula del tablero de Tateti -->
+    <div class="tateti-grid">
+        <!-- Cada una de las celdas del tablero -->
+        <div class="cell" data-index="0"></div>
+        <div class="cell" data-index="1"></div>
+        <div class="cell" data-index="2"></div>
+        <div class="cell" data-index="3"></div>
+        <div class="cell" data-index="4"></div>
+        <div class="cell" data-index="5"></div>
+        <div class="cell" data-index="6"></div>
+        <div class="cell" data-index="7"></div>
+        <div class="cell" data-index="8"></div>
+    </div>
+    <!-- (quién gana o si es empate) -->
+    <p id="message"></p>
+    <!-- reiniciar -->
+    <button id="restart">Reiniciar juego</button>
+    <!-- JavaScript -->
+    <script>
+        // Selecciona todas las celdas del tablero
+        const cells = document.querySelectorAll('.cell');
+        // Selecciona quién ha ganado o si es empate
+        const message = document.getElementById('message');
+        // Botón de reinicio del juego
+        const restartButton = document.getElementById('restart');
+        // Define la variable que guarda el jugador actual (X o O)
+        let currentPlayer = 'X';
+        // Variable para controlar si el juego está activo o no
+        let gameActive = true;
+        // Celdas (vacías al inicio)
+        let boardState = ["", "", "", "", "", "", "", "", ""];
+        // Combinaciones ganadoras del Tateti 
+        const winningCombinations = [
+            [0, 1, 2], 
+            [3, 4, 5], 
+            [6, 7, 8], 
+            [0, 3, 6], 
+            [1, 4, 7], 
+            [2, 5, 8], 
+            [0, 4, 8], 
+            [2, 4, 6]  
+        ];
+        // Añade'click' a cada celda
+        cells.forEach(cell => {
+            cell.addEventListener('click', handleCellClick);
+        });
+        // Función al interacutar con la celda
+        function handleCellClick(event) {
+            const clickedCell = event.target; 
+            const clickedCellIndex = clickedCell.getAttribute('data-index'); 
+            if (boardState[clickedCellIndex] !== "" || !gameActive) {
+                return;
+            }
+            // Actualiza el estado del tablero con el jugador actual
+            boardState[clickedCellIndex] = currentPlayer;
+            // Muestra la X o O 
+            clickedCell.textContent = currentPlayer;
+            // Verifica si hay un ganador o empate
+            checkResult();
+            // Cambia el turno
+            switchPlayer();
+        }
+        // Función para cambiar de jugador entre X y O
+        function switchPlayer() {
+            // Si el jugador actual es X, cambia a O, y viceversa
+            currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+        }
+        // Función para verificar si hay un ganador o empate
+        function checkResult() {
+            let roundWon = false; 
+            for (let i = 0; i < winningCombinations.length; i++) {
+                const winCombo = winningCombinations[i]; // Obtiene la combinación ganadora actual
+                let a = boardState[winCombo[0]]; 
+                let b = boardState[winCombo[1]]; 
+                let c = boardState[winCombo[2]]; 
+                // Si alguna de las celdas de la combinación está vacía, continúa al siguiente
+                if (a === "" || b === "" || c === "") {
+                    continue;
+                }
+                // Si las tres celdas son iguales (X o O), hay un ganador
+                if (a === b && b === c) {
+                    roundWon = true;
+                    break;
+                }
+            }
+            // Si hay un ganador, muestra el mensaje y termina el juego
+            if (roundWon) {
+                message.textContent = `¡El jugador ${currentPlayer} ha ganado!`;
+                gameActive = false; // Detiene el juego
+                return;
+            }
+            // Si no hay celdas vacías y nadie ganó, es un empate
+            if (!boardState.includes("")) {
+                message.textContent = "¡Empate!";
+                gameActive = false; // Detiene el juego
+                return;
+            }
+        }
+        // Evento para reiniciar el juego cuando se hace clic en el botón de reinicio
+        restartButton.addEventListener('click', restartGame);
+        // Función para reiniciar el juego
+        function restartGame() {
+            // Restablece el jugador actual a X
+            currentPlayer = 'X';
+            // Vacía el estado del tablero
+            boardState = ["", "", "", "", "", "", "", "", ""];
+            // Reactiva el juego
+            gameActive = true;
+            // Borra el mensaje de estado
+            message.textContent = "";
+            // Limpia todas las celdas del tablero
+            cells.forEach(cell => (cell.textContent = ""));
+        }
+    </script>
+</body>
+</html>
